@@ -172,6 +172,12 @@ MIDDLEWARE = [
     #'axes.middleware.FailedLoginMiddleware',
     'desktop.middleware.MimeTypeJSFileFixStreamingMiddleware',
     'crequest.middleware.CrequestMiddleware',
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    # It only formats user lockout messages and renders Axes lockout responses
+    # on failed user authentication attempts from login views.
+    # If you do not want Axes to override the authentication response
+    # you can skip installing the middleware and use your own views.
+    'axes.middleware.AxesMiddleware',
 ]
 
 # if os.environ.get(ENV_DESKTOP_DEBUG):
@@ -522,10 +528,12 @@ NOSE_ARGS = [
 
 TIME_ZONE = desktop.conf.TIME_ZONE.get()
 
+AUTHENTICATION_BACKENDS = ('axes.backends.AxesBackend',) 
+
 if desktop.conf.DEMO_ENABLED.get():
-  AUTHENTICATION_BACKENDS = ('desktop.auth.backend.DemoBackend',)
+  AUTHENTICATION_BACKENDS += ('desktop.auth.backend.DemoBackend',)
 else:
-  AUTHENTICATION_BACKENDS = tuple(desktop.conf.AUTH.BACKEND.get())
+  AUTHENTICATION_BACKENDS += tuple(desktop.conf.AUTH.BACKEND.get())
 
 EMAIL_HOST = desktop.conf.SMTP.HOST.get()
 EMAIL_PORT = desktop.conf.SMTP.PORT.get()
